@@ -144,4 +144,18 @@ public class PEngine {
 	        buffer[mx][my].SetPixelColor(0.0f, 1.0f, 0.0f, 1.0f);
 		}
 	}
+	
+	//-------------------------------------------DrawImage-----------------------------------------
+	
+	public void DrawImage(Image image)
+	{
+		for (int i=0;i<image.ReturnWidth();i++)
+		{
+			for (int j=0;j<image.ReturnHeight();j++)
+			{
+				buffer[image.ReturnX()+(image.ReturnWidth()-i)][image.ReturnY()+(image.ReturnHeight()-j)]=
+						image.image[i][j];
+			}
+		}
+	}
 }
