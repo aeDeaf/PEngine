@@ -1,12 +1,21 @@
 package org.pixeles.engine;
+import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-import static org.lwjgl.opengl.GL11.*;
 public class PEngine {
 	
 	//-------------------------------------------PEngine-------------------------------------------
 	
+	private int maxw=160;
+	private int maxh=90;
+	private Pixel buffer[][]=new Pixel[maxw][maxh];
+	private int shiftw;
+	private int shifth;
+	private int w,h;
+	private int psizex;
+	private int psizey;
 	public PEngine(int width, int height)
 	{
 		DisplayMode targetDisplayMode = null;
@@ -22,6 +31,30 @@ public class PEngine {
 	        e.printStackTrace();
 	        System.exit(0);
 	    }
+		if (width>Display.getWidth()) width=Display.getWidth();
+		if (height>Display.getHeight()) height=Display.getHeight();
+		shiftw=(Display.getWidth()-width)/2;
+		shifth=(Display.getHeight()-height)/2;
+		for (int i=0;i<maxw;i++)
+		{
+			for (int j=0;j<maxh;j++)
+			{
+				buffer[i][j]=new Pixel();
+				buffer[i][j].SetPixelColor(0.26f,0.67f,1.0f,1.0f);
+			}
+		}
+		for (int i=0;i<maxw;i++)
+		{
+			for (int j=0;j<30;j++)
+			{
+				buffer[i][j].SetPixelColor(0.59f,0.29f,0.0f,1.0f);
+			}
+		}
+		for (int i=0;i<maxw;i++) buffer[i][30].SetPixelColor(0.0f,1.0f,0.0f,1.0f);
+		w=width;
+		h=height;
+		psizex=w/maxw;
+		psizey=h/maxh;
 	}
 	
 	//-------------------------------------------InitGL--------------------------------------------
@@ -30,7 +63,7 @@ public class PEngine {
 	{
 		glMatrixMode(GL_PROJECTION);
 	    glLoadIdentity();
-	    glOrtho(0, 800, 0, 600, 1, -1);
+	    glOrtho(0, Display.getWidth(), 0, Display.getHeight(), 1, -1);
 	    glMatrixMode(GL_MODELVIEW);
 	}
 	
@@ -59,14 +92,31 @@ public class PEngine {
 	
 	public void SwapBuffers()
 	{
-		 glColor3f(0.5f,0.5f,1.0f);
-         glBegin(GL_QUADS);
-	     	glVertex2f(0,0);
-	        glVertex2f(700,0);
-	        glVertex2f(700,500);
-	        glVertex2f(0,500);
-	     glEnd();
-	     Display.update();
+		for (int i=0;i<maxw;i++)
+		{
+			for (int j=0;j<maxh;j++)
+			{
+				float r,g,b,a;
+				float x1,y1,x2,y2;
+				Pixel p=buffer[i][j];
+				r=p.ReturnRed();
+				g=p.ReturnGreen();
+				b=p.ReturnBlue();
+				a=p.ReturnAlpha();
+				glColor4f(r,g,b,a);
+				x1=shiftw+(i*psizex);
+				x2=x1+psizex;
+				y1=shifth+(j*psizey);
+				y2=y1+psizey;
+				glBegin(GL_QUADS);
+					glVertex2f(x1,y1);
+					glVertex2f(x2,y1);
+					glVertex2f(x2,y2);
+					glVertex2f(x1,y2);
+				glEnd();
+			}
+		}
+		Display.update();
 	}
 	
 	//-------------------------------------------StopEngine----------------------------------------
@@ -75,5 +125,23 @@ public class PEngine {
 	{
 		Display.destroy();
 		System.exit(0);
+	}
+	
+	//-------------------------------------------MouseHandler--------------------------------------
+	
+	public void MouseHandler()
+	{
+		if (Mouse.isButtonDown(0)) 
+		{
+	        int mx = (Mouse.getX()-shiftw)/psizex;
+	        int my = (Mouse.getY()-shifth)/psizey;
+	        buffer[mx][my].SetPixelColor(0.59f, 0.29f, 0.0f, 1.0f);
+		}
+		if (Mouse.isButtonDown(1)) 
+		{
+	        int mx = (Mouse.getX()-shiftw)/psizex;
+	        int my = (Mouse.getY()-shifth)/psizey;
+	        buffer[mx][my].SetPixelColor(0.0f, 1.0f, 0.0f, 1.0f);
+		}
 	}
 }
