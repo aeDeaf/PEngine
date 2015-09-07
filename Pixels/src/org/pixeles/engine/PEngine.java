@@ -11,6 +11,7 @@ public class PEngine {
 	private int maxw=160;
 	private int maxh=90;
 	private Pixel buffer[][]=new Pixel[maxw][maxh];
+	private Pixel map[][]=new Pixel[maxw][maxh];
 	private int shiftw;
 	private int shifth;
 	private int w,h;
@@ -62,6 +63,9 @@ public class PEngine {
 	public void InitGL()
 	{
 		glMatrixMode(GL_PROJECTION);
+		glEnable(GL_ALPHA_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	    glLoadIdentity();
 	    glOrtho(0, Display.getWidth(), 0, Display.getHeight(), 1, -1);
 	    glMatrixMode(GL_MODELVIEW);
@@ -103,6 +107,7 @@ public class PEngine {
 				g=p.ReturnGreen();
 				b=p.ReturnBlue();
 				a=p.ReturnAlpha();
+				if (r==-1.0f) continue;
 				glColor4f(r,g,b,a);
 				x1=shiftw+(i*psizex);
 				x2=x1+psizex;
@@ -142,6 +147,36 @@ public class PEngine {
 	        int mx = (Mouse.getX()-shiftw)/psizex;
 	        int my = (Mouse.getY()-shifth)/psizey;
 	        buffer[mx][my].SetPixelColor(0.0f, 1.0f, 0.0f, 1.0f);
+		}
+	}
+	
+	//-------------------------------------------DrawMap-------------------------------------------
+	
+	public void DrawMap(Map map)
+	{
+		for (int i=0;i<maxw;i++)
+		{
+			for (int j=0;j<maxh;j++)
+			{
+				float r,g,b,a;
+				float x1,y1,x2,y2;
+				Pixel p=map.map[i][j];
+				r=p.ReturnRed();
+				g=p.ReturnGreen();
+				b=p.ReturnBlue();
+				a=p.ReturnAlpha();
+				glColor4f(r,g,b,a);
+				x1=shiftw+(i*psizex);
+				x2=x1+psizex;
+				y1=shifth+(j*psizey);
+				y2=y1+psizey;
+				glBegin(GL_QUADS);
+					glVertex2f(x1,y1);
+					glVertex2f(x2,y1);
+					glVertex2f(x2,y2);
+					glVertex2f(x1,y2);
+				glEnd();
+			}
 		}
 	}
 	
